@@ -1,8 +1,9 @@
 ; Lê uma string e printa ela na tela
 
 section .bss    
-    string    resb 10       ; o maior int tem 10 digitos    
+    string    resb 10       ; o maior int tem 10 digitos        
 section .data    
+    soma dd 0
 section .text
 global _start
 
@@ -67,19 +68,42 @@ input_string:
     push ebp                        ; Retorna
     ret
 
+convert_int:
+    pop ebp
+
+    push ebp
+    ret
 _start:
     push string
     call input_string    
 
-    ; Add um no tamanho pra printar com o \n
-    ; por default eax considera a string sem o \n
-    ; porem o \n é lido tambem caso seja util para print
-    add eax,1
+    mov ecx, eax
+    add ecx, -1         ; loop <- size-1
+    mov ebx, string     ; ebx = string
+    mov dl, [ebx]
+    sub dl, 0x30        ; dl = digito
 
-    push string
-    push eax
-    call print
+    movzx eax, dl       ; valor(eax) = digito
+
+lp:
+    mov edx, 10         
+    mul edx             ; valor*=10
+
+    inc ebx
+    mov dl,[ebx]
+    sub dl, 0x30        ; Lê o prox digito em dl
+
+    movzx edx, dl
+    add eax, edx        ; valor += digito
+
+    loop lp             ; repete
+
+    cmp eax, 2147483647
+    jne error
+
 
     mov eax, 1
     mov ebx, 0
     int 80h    
+    error:
+    
