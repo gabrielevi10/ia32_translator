@@ -4,6 +4,8 @@ section .bss
     string    resb 10       ; o maior int tem 10 digitos        
 section .data    
     soma dd 0
+    hw db 'HELLO MY FREN!', 0x0A
+    hw_size EQU $-hw
 section .text
 global _start
 
@@ -68,42 +70,69 @@ input_string:
     push ebp                        ; Retorna
     ret
 
+; Params em stack = (string)
+; eax = numero convertido
 convert_int:
     pop ebp
+    
+    pop ebx             ; ebx = *string
+    
+    push ecx
+    push edx
 
-    push ebp
-    ret
-_start:
-    push string
-    call input_string    
+    mov dl, [ebx]
+    cmp dl, 0x2D        ; vê se é negativo
+    jne begin_conversion
 
+    inc ebx             ; se for, ignore o caracter '-'
+    add eax, -1         ; um num a menos no loop
+begin_conversion:
     mov ecx, eax
-    add ecx, -1         ; loop <- size-1
-    mov ebx, string     ; ebx = string
+    add ecx, -1         ; loop <- size-1    
     mov dl, [ebx]
     sub dl, 0x30        ; dl = digito
 
     movzx eax, dl       ; valor(eax) = digito
 
-lp:
-    mov edx, 10         
-    mul edx             ; valor*=10
+    lp:
+        mov edx, 10         
+        mul edx             ; valor*=10
 
-    inc ebx
-    mov dl,[ebx]
-    sub dl, 0x30        ; Lê o prox digito em dl
+        inc ebx
+        mov dl,[ebx]
+        sub dl, 0x30        ; Lê o prox digito em dl
 
-    movzx edx, dl
-    add eax, edx        ; valor += digito
+        movzx edx, dl
+        add eax, edx        ; valor += digito
 
-    loop lp             ; repete
+        loop lp             ; repete
 
-    cmp eax, 2147483647
-    jne error
+    mov ebx, string         ; ao fim vê se é negativo o input
+    mov dl, [string]
+    cmp dl, 0x2D
+    jne end_conversion
 
+    neg eax                 ; se for, nega o retorno(eax)
+
+end_conversion:
+    pop edx
+    pop ecx
+
+    push ebp
+    ret
+
+_start:
+    push string
+    call input_string        
+
+    push string
+    call convert_int
+
+    cmp eax,-60
+    jne error    
 
     mov eax, 1
     mov ebx, 0
     int 80h    
+
     error:
-    
