@@ -70,15 +70,19 @@ input_string:
     push ebp                        ; Retorna
     ret
 
-; Params em stack = (string)
+; Params em stack = (string, len_string)
 ; eax = numero convertido
 convert_int:
     pop ebp
     
-    pop ebx             ; ebx = *string
-    
+    pop eax             ; eax = tamanho da string
+    pop esi             ; ebx = *string
+
+    push ebx
     push ecx
     push edx
+
+    mov ebx, esi
 
     mov dl, [ebx]
     cmp dl, 0x2D        ; vê se é negativo
@@ -117,6 +121,7 @@ begin_conversion:
 end_conversion:
     pop edx
     pop ecx
+    pop ebx
 
     push ebp
     ret
@@ -125,11 +130,16 @@ _start:
     push string
     call input_string        
 
+    mov ebx, 4
+    mov ecx, 5
+    mov edx, 6
+
     push string
+    push eax
     call convert_int
 
-    cmp eax,-60
-    jne error    
+    cmp eax,32769
+    jne error 
 
     mov eax, 1
     mov ebx, 0
