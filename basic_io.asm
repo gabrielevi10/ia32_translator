@@ -74,14 +74,16 @@ input_string:
 ; Params em stack = (string, len_string)
 ; eax = numero convertido
 convert_int:
-    enter 0, 0
+    pop ebp
     
+    pop eax             ; eax = tamanho da string
+    pop esi             ; ebx = *string
+
     push ebx
     push ecx
     push edx
 
-    mov eax, [ebp + 8]             ; eax = tamanho da string
-    mov ebx, [ebp + 12]              ; ebx = *string
+    mov ebx, esi
 
     mov dl, [ebx]
     cmp dl, 0x2D        ; vê se é negativo
@@ -96,6 +98,8 @@ begin_conversion:
     sub dl, 0x30        ; dl = digito
 
     movzx eax, dl       ; valor(eax) = digito
+    cmp ecx,0
+    je end_conversion
 
     lp:
         mov edx, 10         
@@ -110,20 +114,21 @@ begin_conversion:
 
         loop lp             ; repete
 
+end_conversion:
     mov ebx, string         ; ao fim vê se é negativo o input
     mov dl, [string]
     cmp dl, 0x2D
-    jne end_conversion
+    jne return
 
     neg eax                 ; se for, nega o retorno(eax)
 
-end_conversion:
+return:
     pop edx
     pop ecx
     pop ebx
 
-    leave 
-    ret 4
+    push ebp
+    ret
 
 
 output_string:
@@ -252,16 +257,16 @@ _start:
     push string
     call input_string        
 
-    mov ebx, 4
-    mov ecx, 5
-    mov edx, 6
+    ; mov ebx, 4
+    ; mov ecx, 5
+    ; mov edx, 6
 
     push string
     push eax
     call convert_int
 
-    cmp eax, 12345
-    jne error 
+    ; cmp eax, 12345
+    ; jne error 
 
     push aux_string
     push eax
