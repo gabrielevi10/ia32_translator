@@ -165,7 +165,7 @@ convert_string:             ; params = (endereco da string, valor a ser converti
 
     sub ecx, ecx            ; i = 0
     cmp eax, 0              
-    jg do_while            ; se eax >= 0, pula para do
+    jge do_while            ; se eax >= 0, pula para do
     mov byte [ebx], 0x2d    ; adiciona o caractere '-' se for negativo
     neg eax
     inc ecx 
