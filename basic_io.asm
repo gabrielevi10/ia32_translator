@@ -1,7 +1,9 @@
 ; Lê uma string e printa ela na tela
 
 section .bss    
-    string    resb 10       ; o maior int tem 10 digitos        
+    string    resb 10       ; o maior int tem 10 digitos 
+    aux_string resb 10  
+    cvstring resb 10    
 section .data    
     soma dd 0
     hw db 'HELLO MY FREN!', 0x0A
@@ -33,14 +35,13 @@ print:
 ; params  = (endereço da string)
 ; retorno = eax <- tamanho da string lida
 input_string:
-    pop ebp
-    pop eax                         ; eax = *(string)
+    enter 0, 0
 
     push ebx
     push ecx
     push edx                        ; Salva os registradores não usados
 
-    mov ecx, eax                    ; ecx = *(string)
+    mov ecx, [ebp + 8]              ; ecx = *(string)
         
     mov  eax, 0          
     push eax                        ; Coloca o acumulador(tamanho da string) na pilha
@@ -67,22 +68,20 @@ input_string:
     pop ecx
     pop ebx                         ; Resgata registradores não usados
     
-    push ebp                        ; Retorna
-    ret
+    leave                        ; Retorna
+    ret 4
 
 ; Params em stack = (string, len_string)
 ; eax = numero convertido
 convert_int:
-    pop ebp
+    enter 0, 0
     
-    pop eax             ; eax = tamanho da string
-    pop esi             ; ebx = *string
-
     push ebx
     push ecx
     push edx
 
-    mov ebx, esi
+    mov eax, [ebp + 8]             ; eax = tamanho da string
+    mov ebx, [ebp + 12]              ; ebx = *string
 
     mov dl, [ebx]
     cmp dl, 0x2D        ; vê se é negativo
@@ -123,8 +122,131 @@ end_conversion:
     pop ecx
     pop ebx
 
-    push ebp
-    ret
+    leave 
+    ret 4
+
+
+output_string:
+    enter 0, 0              ; params = (endereco da string, tamanho)
+
+    push eax
+    push ebx
+    push ecx
+    push edx
+
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, [ebp + 12]     ; endereco da string a ser printada
+    mov edx, [ebp + 8]      ; tamanho da string
+    int 80h
+
+    pop edx
+    pop ecx
+    pop ebx
+    pop eax
+
+    leave
+    ret 4
+
+
+convert_string:             ; params = (endereco da string, valor a ser convertido)
+    enter 0, 0              ; inicia o frame de pilha
+
+    push eax                ; salva todos os registradores utilizados
+    push ebx
+    push ecx
+    push edx
+
+    mov eax, [ebp + 8]      ; eax = Valor
+    mov ebx, [ebp + 12]     ; ebx = str
+
+    sub ecx, ecx            ; i = 0
+    cmp eax, 0              
+    jg do_while            ; se eax >= 0, pula para do
+    mov byte [ebx], 0x2d    ; adiciona o caractere '-' se for negativo
+    neg eax
+    inc ecx 
+
+    do_while:
+        push ebx            ; salva o endereço de retorno
+        cdq                 ; extende o sinal de eax em edx
+        mov ebx, 10
+        idiv ebx            ; Valor % 10 -> edx, Valor/10 -> eax
+        add dl, 0x30        ; dl = (Valor % 10) + 0x30
+
+        pop ebx
+        mov byte [ebx + ecx], dl ; str[i] = dl
+        
+        cmp eax, 0
+        jle eq_zero
+        mov dl, [ebx]
+        mov byte [ebx + ecx + 1], dl  ; str[i+1] = str[i]
+
+        eq_zero:        
+            inc ecx
+    
+    while: 
+        cmp eax, 0
+        jne do_while
+
+    end_do_while:
+        mov byte [ebx + ecx], 0x0
+
+    push ebx
+    push ecx
+    push cvstring
+    call reverse_string
+
+    pop edx
+    pop ecx
+    pop ebx
+    pop eax
+
+    leave 
+    ret 4
+
+
+reverse_string:                     ; params: endereco da string, tamanho, string de saida
+    enter 0, 0
+
+    pusha
+
+    mov esi, [ebp + 16]              ; esi = endereco da string de entrada
+    mov ecx, [ebp + 12]             ; ecx = tamanho
+    mov edi, [ebp + 8]             ; edi = endereco da string de saida             
+    mov edx, 0                      ; indice da string de saida
+    sub ecx, 1                      ; ecx = indice no final da string de entrada
+
+    mov ebx, ecx
+
+    cmp byte [esi], 0x2d
+    jne while_rv
+    mov byte [edi], 0x2d
+    inc edx
+
+    while_rv:
+        cmp edx, ebx                     ; compara edx com o indice no final da string, para saber se ja chegou ao fim 
+        jg end_while_rv             
+        ; cmp byte [esi + ecx], 0x2d       ; ve se o caractere eh '-', se for sai do loop
+        ; je end_while_rv
+
+        mov al, [esi + ecx]
+        mov byte [edi + edx], al
+
+        inc edx
+        sub ecx, 1
+
+        
+
+        jmp while_rv 
+    
+    end_while_rv:
+        mov byte [edi + ebx + 1], 0x0
+        popa
+
+    leave
+    ret 4
+
 
 _start:
     push string
@@ -138,8 +260,16 @@ _start:
     push eax
     call convert_int
 
-    cmp eax,32769
+    cmp eax, 12345
     jne error 
+
+    push aux_string
+    push eax
+    call convert_string
+
+    push cvstring
+    push dword 10
+    call output_string
 
     mov eax, 1
     mov ebx, 0
