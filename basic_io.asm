@@ -74,16 +74,14 @@ input_string:
 ; Params em stack = (string, len_string)
 ; eax = numero convertido
 convert_int:
-    pop ebp
+    enter 0, 0
     
-    pop eax             ; eax = tamanho da string
-    pop esi             ; ebx = *string
-
     push ebx
     push ecx
     push edx
-
-    mov ebx, esi
+    
+    mov eax, [ebp + 8]             ; eax = tamanho da string
+    mov ebx, [ebp + 12]             ; ebx = *string
 
     mov dl, [ebx]
     cmp dl, 0x2D        ; vê se é negativo
@@ -127,8 +125,8 @@ return:
     pop ecx
     pop ebx
 
-    push ebp
-    ret
+    leave 
+    ret 4
 
 
 output_string:
@@ -232,9 +230,7 @@ reverse_string:                     ; params: endereco da string, tamanho, strin
     while_rv:
         cmp edx, ebx                     ; compara edx com o indice no final da string, para saber se ja chegou ao fim 
         jg end_while_rv             
-        ; cmp byte [esi + ecx], 0x2d       ; ve se o caractere eh '-', se for sai do loop
-        ; je end_while_rv
-
+    
         mov al, [esi + ecx]
         mov byte [edi + edx], al
 
