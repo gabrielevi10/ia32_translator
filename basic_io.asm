@@ -6,8 +6,8 @@ section .bss
     cvstring resb 10    
 section .data    
     soma dd 0
-    hw db 'HELLO MY FREN!', 0x0A
-    hw_size EQU $-hw
+    overflow_msg db 'Overflow!', 0x0A
+    overflow_msg_size EQU $-overflow_msg
 section .text
 global _start
 
@@ -249,32 +249,58 @@ reverse_string:                     ; params: endereco da string, tamanho, strin
     leave
     ret 12
 
+; param = numero a se multiplicar pelo eax
+multiply:    
+    pop ebp
+    pop esi
+
+    push ebx
+    push edx
+
+    mov ebx, esi
+
+    mov edx, 0
+    
+    imul ebx
+
+    cmp edx, 0          ; se edx tem alguma coisa é porque deu overflow
+    je end_multiply
+    cmp edx, 0xFFFFFFFF ; se edx tambem não for extensão de sinal é pq deu overflow
+    je end_multiply
+    
+    jmp overflow
+
+end_multiply:
+    pop edx
+    pop ebx
+
+    push ebp
+    ret
 
 _start:
-    push string
-    call input_string        
 
-    ; mov ebx, 4
-    ; mov ecx, 5
-    ; mov edx, 6
+    mov eax, -4
+    mov ebx, -2
+    push ebx
+    call multiply    
 
-    push string
-    push eax
-    call convert_int
-
-    ; cmp eax, 12345
-    ; jne error 
-
-    push aux_string
-    push eax
-    call convert_string
-
-    push cvstring
-    push dword 10
-    call output_string
+    cmp eax, 8
+    jne error
 
     mov eax, 1
     mov ebx, 0
     int 80h    
+    
+overflow:
+
+mov eax, 4
+mov ebx, 1
+mov ecx, overflow_msg
+mov edx, overflow_msg_size
+int 80h
+
+mov eax, 1
+mov ebx, 0
+int 80h
 
     error:
