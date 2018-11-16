@@ -126,13 +126,12 @@ return:
     pop ebx
 
     leave 
-    ret 4
+    ret 8
 
 
 output_string:
     enter 0, 0              ; params = (endereco da string, tamanho)
 
-    push eax
     push ebx
     push ecx
     push edx
@@ -146,10 +145,11 @@ output_string:
     pop edx
     pop ecx
     pop ebx
-    pop eax
+
+    mov eax, [ebp + 8]      ; return= tamanho da string
 
     leave
-    ret 4
+    ret 8
 
 
 convert_string:             ; params = (endereco da string, valor a ser convertido)
@@ -203,10 +203,11 @@ convert_string:             ; params = (endereco da string, valor a ser converti
     pop edx
     pop ecx
     pop ebx
-    pop eax
+    
+    mov eax, ecx            ; return= tamanho da string de saida
 
     leave 
-    ret 4
+    ret 8
 
 
 reverse_string:                     ; params: endereco da string, tamanho, string de saida
@@ -244,9 +245,9 @@ reverse_string:                     ; params: endereco da string, tamanho, strin
     end_while_rv:
         mov byte [edi + ebx + 1], 0x0
         popa
-
+    
     leave
-    ret 4
+    ret 12
 
 
 _start:
