@@ -1,9 +1,8 @@
-; Lê uma string e printa ela na tela
-
 section .bss    
-    string    resb 10       ; o maior int tem 10 digitos 
-    aux_string resb 10  
-    cvstring resb 10    
+    string      resb 10       ; o maior int tem 10 digitos 
+    aux_string  resb 10  
+    cvstring    resb 10
+    some_var    resb 10
 section .data    
     soma dd 0
     overflow_msg db 'Overflow!', 0x0A
@@ -249,7 +248,7 @@ reverse_string:                     ; params: endereco da string, tamanho, strin
     leave
     ret 12
 
-; param = numero a se multiplicar pelo eax
+; param = endereço do numero a se multiplicar pelo eax
 multiply:    
     enter 0,0
     
@@ -257,6 +256,7 @@ multiply:
     push edx
 
     mov ebx, [ebp + 8]
+    mov ebx, [ebx]
 
     mov edx, 0
     
@@ -276,30 +276,60 @@ end_multiply:
     leave
     ret 4
 
-_start:
-    mov edx, 42
+overflow:
+    push overflow_msg
+    push overflow_msg_size
+    call output_string
 
-    mov eax, 10
-    mov ebx, -200
+    mov eax, 1
+    mov ebx, 0
+    int 80h
+
+; param = endereço do numero a se dividir pelo eax
+divide:
+    enter 0,0
+    
     push ebx
-    call multiply    
+    push edx
 
-    cmp eax, -2000
+    mov ebx, [ebp + 8]
+    mov ebx, [ebx]
+
+    mov edx, 0
+
+    idiv ebx
+
+    pop edx
+    pop ebx
+
+    leave
+    ret 4
+
+_start:
+    push some_var
+    call input_string
+
+    push some_var
+    push eax
+    call convert_int
+    
+    mov dword [some_var], 10
+    push some_var
+    call multiply
+
+    cmp eax, 250
     jne error
-    cmp edx, 42
+
+    mov dword [some_var], 10
+    push some_var
+    call divide
+
+    cmp eax, 25
     jne error
+    
 
     mov eax, 1
     mov ebx, 0
     int 80h    
     
-overflow:
-push overflow_msg
-push overflow_msg_size
-call output_string
-
-mov eax, 1
-mov ebx, 0
-int 80h
-
 error:
