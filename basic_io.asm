@@ -79,7 +79,7 @@ convert_int:
     push ecx
     push edx
     
-    mov eax, [ebp + 8]             ; eax = tamanho da string
+    mov eax, [ebp + 8]              ; eax = tamanho da string
     mov ebx, [ebp + 12]             ; ebx = *string
 
     mov dl, [ebx]
@@ -112,8 +112,8 @@ begin_conversion:
         loop lp             ; repete
 
 end_conversion:
-    mov ebx, string         ; ao fim vê se é negativo o input
-    mov dl, [string]
+    mov ebx,[ebp+12]         ; ao fim vê se é negativo o input
+    mov dl, [ebx]
     cmp dl, 0x2D
     jne return
 
@@ -127,9 +127,9 @@ return:
     leave 
     ret 8
 
-
+; params = (endereco da string, tamanho)
 output_string:
-    enter 0, 0              ; params = (endereco da string, tamanho)
+    enter 0, 0              
 
     push ebx
     push ecx
@@ -150,8 +150,8 @@ output_string:
     leave
     ret 8
 
-
-convert_string:             ; params = (endereco da string, valor a ser convertido)
+; params = (endereco da string, valor a ser convertido)
+convert_string:             
     enter 0, 0              ; inicia o frame de pilha
 
     push eax                ; salva todos os registradores utilizados
@@ -208,8 +208,8 @@ convert_string:             ; params = (endereco da string, valor a ser converti
     leave 
     ret 8
 
-
-reverse_string:                     ; params: endereco da string, tamanho, string de saida
+; params: endereco da string, tamanho, string de saida
+reverse_string:                     
     enter 0, 0
 
     pusha
@@ -293,11 +293,11 @@ divide:
     push edx
 
     mov ebx, [ebp + 8]
-    mov ebx, [ebx]
+    mov ebx, [ebx]      ; ebx = inteiro(divisor)
 
-    mov edx, 0
+    cdq                 ; extende o sinal de eax para edx
 
-    idiv ebx
+    idiv ebx            ; divide e retorna
 
     pop edx
     pop ebx
@@ -315,17 +315,19 @@ _start:
     
     mov dword [some_var], 10
     push some_var
-    call multiply
+    call multiply    
 
-    cmp eax, 250
-    jne error
-
-    mov dword [some_var], 10
+    mov dword [some_var], 2
     push some_var
-    call divide
+    call divide    
 
-    cmp eax, 25
-    jne error
+    push aux_string
+    push eax
+    call convert_string
+
+    push cvstring
+    push dword 10
+    call output_string
     
 
     mov eax, 1
