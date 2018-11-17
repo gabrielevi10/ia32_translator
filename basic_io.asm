@@ -251,17 +251,16 @@ reverse_string:                     ; params: endereco da string, tamanho, strin
 
 ; param = numero a se multiplicar pelo eax
 multiply:    
-    pop ebp
-    pop esi
-
+    enter 0,0
+    
     push ebx
     push edx
 
-    mov ebx, esi
+    mov ebx, [ebp + 8]
 
     mov edx, 0
     
-    imul ebx
+    imul ebx    
 
     cmp edx, 0          ; se edx tem alguma coisa é porque deu overflow
     je end_multiply
@@ -274,17 +273,20 @@ end_multiply:
     pop edx
     pop ebx
 
-    push ebp
-    ret
+    leave
+    ret 4
 
 _start:
+    mov edx, 42
 
-    mov eax, -4
-    mov ebx, -2
+    mov eax, 10
+    mov ebx, -200
     push ebx
     call multiply    
 
-    cmp eax, 8
+    cmp eax, -2000
+    jne error
+    cmp edx, 42
     jne error
 
     mov eax, 1
@@ -292,15 +294,12 @@ _start:
     int 80h    
     
 overflow:
-
-mov eax, 4
-mov ebx, 1
-mov ecx, overflow_msg
-mov edx, overflow_msg_size
-int 80h
+push overflow_msg
+push overflow_msg_size
+call output_string
 
 mov eax, 1
 mov ebx, 0
 int 80h
 
-    error:
+error:
