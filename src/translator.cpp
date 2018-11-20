@@ -136,15 +136,18 @@ void translate(string f) {
                 converted_file << label << " resd " << 1 << endl;
         }
     }
+    file.close();
     converted_file.close();
+
+    remove((f + ".pre").c_str());
 }
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        cout << "Erro" << endl;
+        cout << "Passe um arquivo para traduzir." << endl;
     }
     else if (argc > 2) {
-        cout << "Erro";
+        cout << "Passe apenas um arquivo para traduzir.";
     }
     else {
         PreProcessor pre;

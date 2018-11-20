@@ -335,21 +335,21 @@ void initialize_file(ofstream &output_file) {
                 << endl
                 << "    jmp overflow" << endl
                 << endl
-                << "end_multiply:" << endl
+                << "    end_multiply:" << endl
                 << "    pop edx" << endl
                 << "    pop ebx" << endl
                 << endl
                 << "    leave" << endl
                 << "    ret 4" << endl
                 << endl
-                << "overflow:" << endl
-                << "    push overflow_msg" << endl
-                << "    push overflow_msg_size" << endl
-                << "    call PrintString" << endl
+                << "    overflow:" << endl
+                << "        push overflow_msg" << endl
+                << "        push overflow_msg_size" << endl
+                << "        call PrintString" << endl
                 << endl
-                << "    mov eax, 1" << endl
-                << "    mov ebx, 0" << endl
-                << "    int 80h" << endl
+                << "        mov eax, 1" << endl
+                << "        mov ebx, 0" << endl
+                << "        int 80h" << endl
                 << endl
                 << "; param = endereço do numero a se dividir pelo eax" << endl
                 << "divide:" << endl
