@@ -33,10 +33,10 @@ void translate(string f) {
             converted_file << label << ":" << endl;
         }
         if (opcode == "add") {
-            converted_file << "    add eax, " << operands[0] << endl << endl; 
+            converted_file << "    add eax, [" << operands[0] << "]" << endl << endl; 
         }
         else if (opcode == "sub") {
-            converted_file << "    sub eax, " << operands[0] << endl << endl;
+            converted_file << "    sub eax, [" << operands[0] << "]" << endl << endl;
         }
         else if (opcode == "mult") {
             converted_file << "    push " << operands[0] << endl
