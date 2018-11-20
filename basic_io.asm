@@ -5,70 +5,11 @@ section .bss
     some_var    resb 10
 section .data    
     soma dd 0
+    newline db 0x0A
     overflow_msg db 'Overflow!', 0x0A
     overflow_msg_size EQU $-overflow_msg
 section .text
 global _start
-
-;params em stack = ( string, len(string) )
-print:
-    pop ebp         ; salva o retorno em ebp    
-
-    pop edx         ; primeiro pop no tamanho dela
-    pop ecx         ; depois   pop a string
-
-    push eax        ; salva o eax
-    push ebx        ; salva o ebx
-
-    mov eax, 4      ; system call:
-    mov ebx, 1    
-    int 80h
-
-    pop ebx         ; resgata eax
-    pop eax         ; resgata ebx
-
-    push ebp        ; devolve o retorno à pilha
-    ret
-
-
-; params  = (endereço da string)
-; retorno = eax <- tamanho da string lida
-input_string:
-    enter 0, 0
-
-    push ebx
-    push ecx
-    push edx                        ; Salva os registradores não usados
-
-    mov ecx, [ebp + 8]              ; ecx = *(string)
-        
-    mov  eax, 0          
-    push eax                        ; Coloca o acumulador(tamanho da string) na pilha
-    input_loop:        
-        mov eax, 3
-        mov ebx, 0
-        mov edx, 1
-        int 80h                     ; syscall de input(lê um digito)
-        
-        cmp byte [ecx], 0x0A
-        je  end_input               ; Se não for \n continua lendo        
-
-        inc ecx                     ; incrementa endereço da string
-        pop ebx                     ; desempilha tamanho
-        add ebx, 1                  
-        push ebx                    ; incrementa tamanho e empilha de volta
-
-        jmp input_loop              ; Volta pra loop
-
-    end_input:
-    pop eax                         ; Desempilha tamanho
-
-    pop edx
-    pop ecx
-    pop ebx                         ; Resgata registradores não usados
-    
-    leave                        ; Retorna
-    ret 4
 
 ; Params em stack = (string, len_string)
 ; eax = numero convertido
@@ -127,28 +68,7 @@ return:
     leave 
     ret 8
 
-; params = (endereco da string, tamanho)
-output_string:
-    enter 0, 0              
 
-    push ebx
-    push ecx
-    push edx
-
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, [ebp + 12]     ; endereco da string a ser printada
-    mov edx, [ebp + 8]      ; tamanho da string
-    int 80h
-
-    pop edx
-    pop ecx
-    pop ebx
-
-    mov eax, [ebp + 8]      ; return= tamanho da string
-
-    leave
-    ret 8
 
 ; params = (endereco da string, valor a ser convertido)
 convert_string:             
@@ -216,7 +136,7 @@ reverse_string:
 
     mov esi, [ebp + 16]              ; esi = endereco da string de entrada
     mov ecx, [ebp + 12]             ; ecx = tamanho
-    mov edi, [ebp + 8]             ; edi = endereco da string de saida             
+    mov edi, [ebp + 8]              ; edi = endereco da string de saida             
     mov edx, 0                      ; indice da string de saida
     sub ecx, 1                      ; ecx = indice no final da string de entrada
 
@@ -279,7 +199,7 @@ end_multiply:
 overflow:
     push overflow_msg
     push overflow_msg_size
-    call output_string
+    call PrintString
 
     mov eax, 1
     mov ebx, 0
@@ -305,30 +225,202 @@ divide:
     leave
     ret 4
 
-_start:
-    push some_var
-    call input_string
+ReadInt:
+    enter 0, 0
 
-    push some_var
+    call clear_string
+
+    push ebx
+
+    mov ebx, [ebp + 8]  ; ebx = endereco do int
+    push ebx
+    call ReadString
+    push ebx
     push eax
     call convert_int
-    
-    mov dword [some_var], 10
-    push some_var
-    call multiply    
 
-    mov dword [some_var], 2
-    push some_var
-    call divide    
+    pop ebx
+
+    leave
+    ret 4
+
+PrintInt:
+    enter 0, 0
+
+    call clear_string
+
+    push ebx
+    mov ebx, [ebp + 8] 
 
     push aux_string
-    push eax
+    push ebx
     call convert_string
 
     push cvstring
     push dword 10
-    call output_string
+    call PrintString
+
+    pop ebx
+    leave
     
+    ret 4
+
+ReadChar:
+    enter 0,0
+
+    push eax
+    push ebx
+    push ecx
+    push edx
+
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, [ebp + 8]   ;endereco do char
+    mov edx, 1
+    int 80h
+
+    pop eax
+    pop ebx
+    pop ecx
+    pop edx
+
+    leave
+    ret 4
+
+PrintChar:
+    enter 0,0
+
+    push eax
+    push ebx
+    push ecx
+    push edx
+
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, [ebp + 8]     ; endereco da string a ser printada
+    mov edx, 1             ; tamanho da string
+    int 80h
+
+    pop eax
+    pop ebx
+    pop ecx
+    pop edx
+
+    leave
+    ret 4
+
+; params  = (endereço da string)
+; retorno = eax <- tamanho da string lida
+ReadString:
+    enter 0, 0
+
+    push ebx
+    push ecx
+    push edx                        ; Salva os registradores não usados
+
+    mov ecx, [ebp + 8]              ; ecx = *(string)
+        
+    mov  eax, 0          
+    push eax                        ; Coloca o acumulador(tamanho da string) na pilha
+    input_loop:        
+        mov eax, 3
+        mov ebx, 0
+        mov edx, 1
+        int 80h                     ; syscall de input(lê um digito)
+        
+        cmp byte [ecx], 0x0A
+        je  end_input               ; Se não for \n continua lendo        
+
+        inc ecx                     ; incrementa endereço da string
+        pop ebx                     ; desempilha tamanho
+        add ebx, 1                  
+        push ebx                    ; incrementa tamanho e empilha de volta
+
+        jmp input_loop              ; Volta pra loop
+
+    end_input:
+    pop eax                         ; Desempilha tamanho
+
+    pop edx
+    pop ecx
+    pop ebx                         ; Resgata registradores não usados
+    
+    leave                        ; Retorna
+    ret 4
+    
+; params = (endereco da string, tamanho)
+PrintString:
+    enter 0, 0              
+
+    push ebx
+    push ecx
+    push edx
+
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, [ebp + 12]     ; endereco da string a ser printada
+    mov edx, [ebp + 8]      ; tamanho da string
+    int 80h
+
+    pop edx
+    pop ecx
+    pop ebx
+
+    mov eax, [ebp + 8]      ; return= tamanho da string
+
+    leave
+    ret 8
+
+clear_string:
+    enter 0, 0
+    
+    push ecx
+    sub ecx, ecx
+
+    for1:
+    cmp ecx, 10
+    je endfor1
+
+    mov byte [aux_string + ecx], 0x0
+    mov byte [cvstring + ecx], 0x0
+    mov byte [string + ecx], 0x0
+    mov byte [some_var + ecx], 0x0
+
+    inc ecx
+
+    jmp for1
+
+    endfor1:
+    pop ecx
+    leave
+    ret 4
+
+_start:
+    push some_var
+    call ReadInt
+
+    ; push some_var
+    ; push eax
+    ; call convert_int
+    
+    ; mov dword [some_var], 10
+    ; push some_var
+    ; call multiply    
+
+    ; mov dword [some_var], 2
+    ; push some_var
+    ; call divide    
+
+
+    push eax
+    call PrintInt
+    
+
+    push some_var
+    call ReadInt
+
+    push eax
+    call PrintInt
 
     mov eax, 1
     mov ebx, 0
