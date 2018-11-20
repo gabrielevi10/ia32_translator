@@ -1,4 +1,4 @@
-FILEASM = basic_io.asm
+FILEASM = triangulo.s
 EXEASM = basic_io.out
 OBJASM = basic_io.o
 
@@ -15,6 +15,8 @@ CFLAGS   = $(INCS) -std=c11 -ggdb3
 RM       = rm -f
 
 .PHONY: all all-before all-after clean clean-custom
+
+$(shell mkdir -p obj)
 
 all: $(BIN) all-after
 

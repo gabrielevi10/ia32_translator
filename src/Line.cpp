@@ -1,13 +1,11 @@
 #include "Line.hpp"
 
+Line::Line() {}
+
 Line::Line(string l, string opc, vector<string> ops) :
     label(l),
     opcode(opc),
-    operands(ops) {
-    this->label    = l;
-    this->opcode   = opc;
-    this->operands = ops;
-}
+    operands(ops) {}
 
 string Line::to_print(){
     string ret;    

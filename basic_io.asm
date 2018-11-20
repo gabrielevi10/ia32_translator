@@ -378,17 +378,17 @@ clear_string:
     sub ecx, ecx
 
     for1:
-    cmp ecx, 10
-    je endfor1
+        cmp ecx, 10
+        je endfor1
 
-    mov byte [aux_string + ecx], 0x0
-    mov byte [cvstring + ecx], 0x0
-    mov byte [string + ecx], 0x0
-    mov byte [some_var + ecx], 0x0
+        mov byte [aux_string + ecx], 0x0
+        mov byte [cvstring + ecx], 0x0
+        mov byte [string + ecx], 0x0
+        mov byte [some_var + ecx], 0x0
 
-    inc ecx
+        inc ecx
 
-    jmp for1
+        jmp for1
 
     endfor1:
     pop ecx

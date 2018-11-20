@@ -69,3 +69,58 @@ string format_line(string line) {
 
     return line;
 }
+
+Line token_separator(string input) {
+    string label, opcode;
+    vector<string> operands;
+
+    label  = "";
+    opcode = "";
+
+    // Pega o rótulo caso exista
+    if(input.find(':') != -1) {        
+        label = input.substr(0, input.find(':'));
+        input = input.substr(input.find(':')+1, input.length());
+    }
+
+    // Pega o opcode
+    input = remove_initial_spaces(input);
+    if(input.find(' ') == -1) {
+        // Para o caso dos que não possuem argumentos
+        // Não existe espaço após a diretiva
+        opcode = input;
+        input = "";
+    }
+    else {
+        // Para o caso das que possuem argumentos
+        // Existe um espaço que separa o opcode deles
+        opcode = input.substr(0, input.find(' '));
+        input = input.substr(input.find(' ')+1,input.length());
+    }    
+
+    // Se achar uma vírgula possui dois argumentos
+    if(input.find(',') != -1) {
+        auto args = split(input,',');
+
+        // Add cada argumento ao vetor dedicado(operands)
+        for(string s : args){
+            s = remove_initial_spaces(s);
+            if(!s.empty()) {
+                operands.push_back(s);
+            }
+        }
+    }
+    // Se não achar virgula só possui um argumento
+    else {
+        // Remove espaços iniciais e finais desnecessários
+        input = remove_initial_spaces(input);
+        input = remove_final_spaces(input);
+        
+        if(!input.empty()) {
+            operands.push_back(input);
+        }
+    }
+
+    Line l(label, opcode, operands);
+    return l;
+}

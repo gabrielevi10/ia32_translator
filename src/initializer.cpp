@@ -17,9 +17,9 @@ void initialize_file(ofstream &output_file) {
                 << endl
                 << "ReadInt:" << endl
                 << "    enter 0, 0" << endl
-                << "" << endl
+                << endl
                 << "    call clear_string" << endl
-                << "" << endl
+                << endl
                 << "    push ebx" << endl
                 << endl
                 << "    mov ebx, [ebp + 8]  ;ebx = endereco do int" << endl
@@ -373,26 +373,27 @@ void initialize_file(ofstream &output_file) {
                 << endl
                 << "clear_string:" << endl
                 << "    enter 0, 0" << endl
-                << "" << endl
+                << endl
                 << "    push ecx" << endl
                 << "    sub ecx, ecx" << endl
-                << "" << endl
+                << endl
                 << "    for1:" << endl
-                << "    cmp ecx, 10" << endl
-                << "    je endfor1" << endl
-                << "" << endl
-                << "    mov byte [aux_string + ecx], 0x0" << endl
-                << "    mov byte [cvstring + ecx], 0x0" << endl
-                << "    mov byte [string + ecx], 0x0" << endl
-                << "    mov byte [some_var + ecx], 0x0" << endl
-                << "" << endl
-                << "    inc ecx" << endl
-                << "" << endl
+                << "        cmp ecx, 10" << endl
+                << "        je endfor1" << endl
+                << endl
+                << "        mov byte [aux_string + ecx], 0x0" << endl
+                << "        mov byte [cvstring + ecx], 0x0" << endl
+                << "        mov byte [string + ecx], 0x0" << endl
+                << "        mov byte [some_var + ecx], 0x0" << endl
+                << endl
+                << "        inc ecx" << endl
+                << endl
                 << "    jmp for1" << endl
-                << "" << endl
+                << endl
                 << "    endfor1:" << endl
                 << "    pop ecx" << endl
                 << "    leave" << endl
                 << "    ret 4" << endl
-                << "" << endl;
+                << endl
+                << "_start:" << endl;
 }
