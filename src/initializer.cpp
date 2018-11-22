@@ -10,6 +10,7 @@ void initialize_file(ofstream &output_file) {
                 << "    some_var resb 10" << endl
                 << "section .data" << endl
                 << "    soma dd 0" << endl
+                << "    newline db 0x0a" << endl
                 << "    overflow_msg db 'Overflow!', 0x0A" << endl
                 << "    overflow_msg_size EQU $-overflow_msg" << endl
                 << "section .text" << endl
@@ -97,6 +98,7 @@ void initialize_file(ofstream &output_file) {
                 << "    pop ecx" << endl
                 << "    pop edx" << endl
                 << endl
+                << "    call printNewLine" << endl
                 << "    leave" << endl
                 << "    ret 4" << endl
                 << endl
@@ -160,6 +162,7 @@ void initialize_file(ofstream &output_file) {
                 << endl
                 << "    mov eax, [ebp + 8]      ; return= tamanho da string" << endl
                 << endl
+                << "    call printNewLine" << endl
                 << "    leave" << endl
                 << "    ret 8" << endl
                 << endl
@@ -394,6 +397,18 @@ void initialize_file(ofstream &output_file) {
                 << "    pop ecx" << endl
                 << "    leave" << endl
                 << "    ret 4" << endl
+                << endl
+                << "printNewLine:" << endl
+                << "    enter 0,0" << endl
+                << "    pusha" << endl
+                << "    mov eax, 4" << endl
+                << "    mov ebx, 1" << endl
+                << "    mov ecx, newline" << endl
+                << "    mov edx, 1" << endl
+                << "    int 80h" << endl
+                << "    popa" << endl
+                << "    leave" << endl
+                << "    ret" << endl
                 << endl
                 << "_start:" << endl;
 }

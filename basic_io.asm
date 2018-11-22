@@ -394,6 +394,7 @@ clear_string:
     pop ecx
     leave
     ret 4
+    
 
 _start:
     push some_var

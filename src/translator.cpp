@@ -106,7 +106,7 @@ void translate(string f) {
         else if (opcode == "s_output") {
             converted_file << "    push eax" << endl
                            << "    push " << operands[0] << endl
-                           << "    push " << operands[1] << endl
+                           << "    push dword [" << operands[1] << "]" << endl
                            << "    call PrintString" << endl
                            << "    pop eax" << endl << endl;
         }

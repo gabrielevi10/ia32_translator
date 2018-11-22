@@ -1,4 +1,4 @@
-FILEASM = bin.s
+FILEASM = triangulo.s
 EXEASM = basic_io.out
 OBJASM = basic_io.o
 
